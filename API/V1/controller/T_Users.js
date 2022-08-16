@@ -1,14 +1,18 @@
-const Users=require("../models/users.js");
+const Users=require("../models/T_Users.js");
 const mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
-const { options } = require("../routes/product.js");
-const users = require("../models/users.js");
+const users = require("../models/T_Users.js");
+
+
+
+
+
 module.exports={
 
     Login:(req,res)=>{
-        const {Username,Pass}=req.body;
-            Users.find({Username:Username}).then((rows)=>{
+        const {email,Pass}=req.body;
+            Users.find({email:email}).then((rows)=>{
                 if(rows.length==0)
                     return res.status(409).json({msg:`user name not found`});
                 bcrypt.compare(Pass,rows[0].Pass).then((status)=>{
@@ -16,7 +20,10 @@ module.exports={
                     return res.status(409).json({msg:`password not match`});
                     else
                     {
-                        const token=jwt.sign({Username},process.env.SECRET_KEY,{expiresIn:'1h'});
+                        subj="mail from raz";
+                        body="<h1> hello from nodemailer's raz </h1>";
+                        require('../../../emailsend').SendEmail(email,subj,body);
+                        const token=jwt.sign({email},process.env.SECRET_KEY,{expiresIn:'1h'});               
                         return res.status(200).json({msg:`Login seccessfull token:${token}`});
                     }
                     
@@ -25,19 +32,23 @@ module.exports={
         },
         
     Register:(req,res)=>{
-    const {Uid,Username,Pass}=req.body;
-    Users.find({Username}).then((rows)=>{
+    const {Phone,Bdate,Address,Fullname,email,Pass}=req.body;
+    Users.find({email:email}).then((rows)=>{
         if(rows.length>0)
-          return res.status(409).json({msg:`User name  allready exist=${Username}`});
+          return res.status(409).json({msg:`email allready exist=${email}`});
         bcrypt.hash(Pass,12).then((hashpass)=>{
             const users=new Users({
                 _id:new mongoose.Types.ObjectId(),
-                 Uid,
-                 Username,
-                 Pass:hashpass
+                email:email,
+                Fullname:Fullname,
+                 Pass:hashpass,
+                 Phone:Phone,
+                 Bdate:Bdate,
+                 Address:Address
+             
              });
           users.save().then((Users)=>{
-          return res.status(200).json({msg:"users added"});
+          return res.status(200).json({msg:"users added seccessfull"});
           });
         }).catch((error)=>{
             return res.status(505).json({error});

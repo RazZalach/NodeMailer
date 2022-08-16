@@ -20,6 +20,7 @@
     "mongoose": "^6.2.10",
     "morgan": "^1.10.0",
     "mssql": "^8.1.1",
+    "nodemailer": "^6.7.8",
     "nodemon": "^2.0.15"
   }
 }
